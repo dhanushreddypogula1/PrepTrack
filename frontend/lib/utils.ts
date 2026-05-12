@@ -63,3 +63,15 @@ export const ELIGIBILITY_COLORS: Record<
   stretch: "text-amber-400",
   not_eligible: "text-rose-400",
 };
+export const DIFFICULTY_LABELS: Record<string, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+}
+
+export function fmtSecs(seconds: number) {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+
+  return `${mins}:${secs.toString().padStart(2, "0")}`
+}
