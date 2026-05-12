@@ -9,8 +9,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database
-from backend.database import Base, engine
+# Import models/db init
+try:
+    from src.database import Base, engine
+
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print("Database init skipped:", e)
 
 # Routers
 from backend.routers import (
@@ -25,10 +30,6 @@ from backend.routers import (
     leetcode,
 )
 
-# Create DB tables automatically
-Base.metadata.create_all(bind=engine)
-
-# FastAPI App
 app = FastAPI(
     title="PrepTrack API",
     version="2.0.0",
@@ -109,7 +110,7 @@ app.include_router(
 def health():
     return {"status": "ok"}
 
-# Root Endpoint
+# Root Route
 @app.get("/")
 def root():
     return {
