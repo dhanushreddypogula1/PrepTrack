@@ -17,23 +17,39 @@ import {
 import { RadarChart } from "@/components/RadarChart";
 import { toast } from "sonner";
 
-const TABS = ["Fit Analysis", "Hiring Process", "Skill Gaps", "AI Roadmap", "Tips"];
+const TABS = [
+  "Fit Analysis",
+  "Hiring Process",
+  "Skill Gaps",
+  "AI Roadmap",
+  "Tips",
+];
+
+type SkillGap = {
+  skill: string;
+  importance: string;
+  fix_effort_weeks: number;
+  description: string;
+};
 
 export default function CompanyDeepDivePage() {
   const { slug } = useParams<{ slug: string }>();
+
   const companyName = slug
     .split("-")
     .map((w) => w[0].toUpperCase() + w.slice(1))
     .join("");
 
   const { lastProfile: profile, lastPrediction: pred } = useStore();
+
   const [tab, setTab] = useState(0);
   const [roadmap, setRoadmap] = useState("");
   const [roadmapLoading, setRoadmapLoading] = useState(false);
 
   const { data: match, isLoading } = useQuery({
     queryKey: ["company-match", companyName],
-    queryFn: () => apiMatchOne(companyName, profile!, pred!.placement_probability),
+    queryFn: () =>
+      apiMatchOne(companyName, profile!, pred!.placement_probability),
     enabled: !!profile && !!pred,
   });
 
@@ -48,6 +64,7 @@ export default function CompanyDeepDivePage() {
         profile,
         pred.placement_probability
       );
+
       setRoadmap(text);
     } catch {
       toast.error("Failed to generate roadmap");
@@ -57,7 +74,11 @@ export default function CompanyDeepDivePage() {
   }
 
   if (!profile || !pred) {
-    return <p className="text-gray-400">Complete an assessment first.</p>;
+    return (
+      <p className="text-gray-400">
+        Complete an assessment first.
+      </p>
+    );
   }
 
   if (isLoading) {
@@ -65,7 +86,11 @@ export default function CompanyDeepDivePage() {
   }
 
   if (!match) {
-    return <p className="text-rose-400">Company not found: {companyName}</p>;
+    return (
+      <p className="text-rose-400">
+        Company not found: {companyName}
+      </p>
+    );
   }
 
   const radarData = Object.entries(match.fit_breakdown).map(([k, v]) => ({
@@ -114,7 +139,11 @@ export default function CompanyDeepDivePage() {
               {match.fit_score}
               <span className="text-lg text-gray-400">/100</span>
             </p>
-            <p className="text-sm text-gray-400">Fit Score</p>
+
+            <p className="text-sm text-gray-400">
+              Fit Score
+            </p>
+
             <p className="text-sm text-violet-400 font-semibold">
               {fmtPct(match.calibrated_probability)} selection est.
             </p>
@@ -133,7 +162,10 @@ export default function CompanyDeepDivePage() {
             key={t}
             onClick={() => {
               setTab(i);
-              if (i === 3) loadRoadmap();
+
+              if (i === 3) {
+                loadRoadmap();
+              }
             }}
             className={cn(
               "flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
@@ -147,13 +179,14 @@ export default function CompanyDeepDivePage() {
         ))}
       </div>
 
-      {/* Tab content */}
+      {/* Tab Content */}
       <motion.div
         key={tab}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass-card p-6"
       >
+        {/* Fit Analysis */}
         {tab === 0 && (
           <div className="space-y-4">
             <RadarChart data={radarData} />
@@ -164,11 +197,16 @@ export default function CompanyDeepDivePage() {
                   ✅ Matched
                 </p>
 
-                {match.matched_factors.map((f: string, i: number) => (
-                  <p key={i} className="text-xs text-emerald-400 py-0.5">
-                    {f}
-                  </p>
-                ))}
+                {match.matched_factors.map(
+                  (f: string, i: number) => (
+                    <p
+                      key={i}
+                      className="text-xs text-emerald-400 py-0.5"
+                    >
+                      {f}
+                    </p>
+                  )
+                )}
               </div>
 
               <div>
@@ -177,19 +215,27 @@ export default function CompanyDeepDivePage() {
                 </p>
 
                 {match.missing_factors.length ? (
-                  match.missing_factors.map((f: string, i: number) => (
-                    <p key={i} className="text-xs text-rose-400 py-0.5">
-                      {f}
-                    </p>
-                  ))
+                  match.missing_factors.map(
+                    (f: string, i: number) => (
+                      <p
+                        key={i}
+                        className="text-xs text-rose-400 py-0.5"
+                      >
+                        {f}
+                      </p>
+                    )
+                  )
                 ) : (
-                  <p className="text-xs text-emerald-400">Nothing critical!</p>
+                  <p className="text-xs text-emerald-400">
+                    Nothing critical!
+                  </p>
                 )}
               </div>
             </div>
           </div>
         )}
 
+        {/* Hiring Process */}
         {tab === 1 && (
           <div className="space-y-3">
             <p className="text-sm text-gray-300 font-mono bg-surface rounded-lg p-3 text-xs leading-relaxed">
@@ -197,7 +243,10 @@ export default function CompanyDeepDivePage() {
             </p>
 
             <div>
-              <p className="text-xs text-gray-500 mb-2">Prep Timeline</p>
+              <p className="text-xs text-gray-500 mb-2">
+                Prep Timeline
+              </p>
+
               <p className="text-white font-semibold">
                 {match.prep_timeline_weeks} weeks recommended
               </p>
@@ -205,51 +254,58 @@ export default function CompanyDeepDivePage() {
           </div>
         )}
 
+        {/* Skill Gaps */}
         {tab === 2 && (
           <div className="space-y-3">
             {match.skill_gaps.length === 0 ? (
               <p className="text-emerald-400 text-sm">
-                🎉 No critical skill gaps for {match.company_name}!
+                🎉 No critical skill gaps for{" "}
+                {match.company_name}!
               </p>
             ) : (
-              match.skill_gaps.map((g, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "rounded-xl p-4 border",
-                    g.importance === "critical"
-                      ? "bg-rose-400/10 border-rose-400/20"
-                      : "bg-amber-400/10 border-amber-400/20"
-                  )}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-sm text-white">
-                      {g.skill}
-                    </span>
+              match.skill_gaps.map(
+                (g: SkillGap, i: number) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "rounded-xl p-4 border",
+                      g.importance === "critical"
+                        ? "bg-rose-400/10 border-rose-400/20"
+                        : "bg-amber-400/10 border-amber-400/20"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-sm text-white">
+                        {g.skill}
+                      </span>
 
-                    <span
-                      className={cn(
-                        "text-xs px-1.5 py-0.5 rounded font-medium capitalize",
-                        g.importance === "critical"
-                          ? "bg-rose-400/20 text-rose-300"
-                          : "bg-amber-400/20 text-amber-300"
-                      )}
-                    >
-                      {g.importance}
-                    </span>
+                      <span
+                        className={cn(
+                          "text-xs px-1.5 py-0.5 rounded font-medium capitalize",
+                          g.importance === "critical"
+                            ? "bg-rose-400/20 text-rose-300"
+                            : "bg-amber-400/20 text-amber-300"
+                        )}
+                      >
+                        {g.importance}
+                      </span>
 
-                    <span className="text-xs text-gray-500 ml-auto">
-                      ~{g.fix_effort_weeks}w to fix
-                    </span>
+                      <span className="text-xs text-gray-500 ml-auto">
+                        ~{g.fix_effort_weeks}w to fix
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-gray-300">
+                      {g.description}
+                    </p>
                   </div>
-
-                  <p className="text-xs text-gray-300">{g.description}</p>
-                </div>
-              ))
+                )
+              )
             )}
           </div>
         )}
 
+        {/* AI Roadmap */}
         {tab === 3 && (
           <div>
             {roadmapLoading && (
@@ -260,7 +316,9 @@ export default function CompanyDeepDivePage() {
                     <div
                       key={i}
                       className="h-3 bg-surface rounded animate-pulse"
-                      style={{ width: `${60 + Math.random() * 40}%` }}
+                      style={{
+                        width: `${60 + Math.random() * 40}%`,
+                      }}
                     />
                   ))}
               </div>
@@ -268,27 +326,40 @@ export default function CompanyDeepDivePage() {
 
             {roadmap ? (
               <div className="prose prose-invert prose-sm max-w-none">
-                <ReactMarkdown>{roadmap}</ReactMarkdown>
+                <ReactMarkdown>
+                  {roadmap}
+                </ReactMarkdown>
               </div>
             ) : (
               !roadmapLoading && (
                 <p className="text-gray-400 text-sm">
-                  Click the &quot;AI Roadmap&quot; tab to generate your
-                  personalized roadmap.
+                  Click the &quot;AI Roadmap&quot; tab
+                  to generate your personalized roadmap.
                 </p>
               )
             )}
           </div>
         )}
 
+        {/* Tips */}
         {tab === 4 && (
           <div className="space-y-3">
-            {match.top_tips.map((tip, i) => (
-              <div key={i} className="flex gap-3 text-sm">
-                <span className="text-violet-400 font-bold">{i + 1}.</span>
-                <p className="text-gray-300">{tip}</p>
-              </div>
-            ))}
+            {match.top_tips.map(
+              (tip: string, i: number) => (
+                <div
+                  key={i}
+                  className="flex gap-3 text-sm"
+                >
+                  <span className="text-violet-400 font-bold">
+                    {i + 1}.
+                  </span>
+
+                  <p className="text-gray-300">
+                    {tip}
+                  </p>
+                </div>
+              )
+            )}
           </div>
         )}
       </motion.div>
