@@ -1,5 +1,5 @@
 // ── Auth ──────────────────────────────────────────────────────────────────────
-export interface User { id: number; username: string; email: string; avatar_url?: string }
+export interface User { id: number; username: string; email: string; avatar_url?: string;provide?: string }
 export interface AuthToken { access_token: string; token_type: string; user: User }
 
 // ── Assessment ────────────────────────────────────────────────────────────────
