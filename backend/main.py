@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Database
+from backend.database import Base, engine
+
+# Routers
 from backend.routers import (
     auth,
     predict,
@@ -21,24 +25,31 @@ from backend.routers import (
     leetcode,
 )
 
+# Create DB tables automatically
+Base.metadata.create_all(bind=engine)
+
+# FastAPI App
 app = FastAPI(
     title="PrepTrack API",
     version="2.0.0",
     docs_url="/api/docs",
 )
 
+# CORS
+origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv(
-        "ALLOWED_ORIGINS",
-        "http://localhost:3000"
-    ).split(","),
-
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Routers
 app.include_router(
     auth.router,
     prefix="/api/auth",
@@ -93,10 +104,14 @@ app.include_router(
     tags=["leetcode"]
 )
 
-
+# Health Check
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+# Root Endpoint
 @app.get("/")
 def root():
-    return {"message": "PrepTrack API Running"}
+    return {
+        "message": "PrepTrack API Running"
+    }
