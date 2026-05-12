@@ -97,3 +97,6 @@ app.include_router(
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+@app.get("/")
+def root():
+    return {"message": "PrepTrack API Running"}
